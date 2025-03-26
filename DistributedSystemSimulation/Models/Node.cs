@@ -2,6 +2,9 @@ using System.IO.Compression;
 
 namespace DistributedSystemSimulation.Models;
 
+/// <summary>
+/// The role of the node in the distributed system
+/// </summary>
 public enum NodeRole
 {
     Follower,
@@ -12,20 +15,56 @@ public enum NodeRole
 /// <summary>
 /// A node in the distributed system
 /// </summary>
-/// <param name="id">The ID of the node</param>
 public class Node
 {
+    /// <summary>
+    /// The unique ID of the node
+    /// </summary>
     public int Id { get; }
+
+    /// <summary>
+    /// The neighbors of the node, contains the
+    /// </summary>
     public HashSet<Node> Neighbors { get; } = [];
+
+    /// <summary>
+    /// The log entries of the node
+    /// </summary>
     private readonly List<string> _logEntries = [];
+
+    /// <summary>
+    /// Whether the node is offline or not (Simulated)
+    /// </summary>
     private bool IsOffline { get; set; } = false;
 
+    /// <summary>
+    /// The current role of the node
+    /// </summary>
     private NodeRole _currentRole = NodeRole.Follower;
+
+    /// <summary>
+    /// The current term of the leadership election
+    /// </summary>
     private int _currentTerm = 0;
+
+    /// <summary>
+    /// The node that this node voted for in the current term
+    /// </summary>
     private int? _votedFor = null;
+
+    /// <summary>
+    /// The votes received from other nodes in the current term
+    /// </summary>
     private Dictionary<int, int> _votesReceived = new();
 
+    /// <summary>
+    /// The current state of the node
+    /// </summary>
     private int _currentState = 0;
+
+    /// <summary>
+    /// The ID of the current leader
+    /// </summary>
     private int? _currentLeaderId = null;
 
     /// <summary>
@@ -116,7 +155,7 @@ public class Node
     }
 
     /// <summary>
-    /// Simulates the node being offline
+    /// Simulates the node going offline, if the node is the leader, it will clear the leader id of all neighbors and start an election with the first online neighbor
     /// </summary>
     public void SimulateOffline()
     {
@@ -143,6 +182,9 @@ public class Node
         }
     }
 
+    /// <summary>
+    /// Simulates the node coming back online, the node will ask its neighbors who the leader is and synchronize its state with the leader
+    /// </summary>
     public void SimulateOnline()
     {
         IsOffline = false;
@@ -177,6 +219,10 @@ public class Node
         StartElection();
     }
 
+    /// <summary>
+    /// Synchronizes the state of a follower with the current state
+    /// </summary>
+    /// <param name="follower">The follower to synchronize with</param>
     public void SynchronizeFollower(Node follower)
     {
         if (_currentRole != NodeRole.Leader)
@@ -188,6 +234,10 @@ public class Node
         follower.ReceiveSynchronization(_currentState);
     }
 
+    /// <summary>
+    /// Receives a synchronization from the leader
+    /// </summary>
+    /// <param name="state">The state to synchronize with</param>
     public void ReceiveSynchronization(int state)
     {
         if (state > _currentState)
@@ -201,6 +251,9 @@ public class Node
         }
     }
 
+    /// <summary>
+    /// Starts an election using the current node as the candidate
+    /// </summary>
     public void StartElection()
     {
         if (IsOffline)
@@ -225,6 +278,11 @@ public class Node
         CheckElectionResult();
     }
 
+    /// <summary>
+    /// Receives a vote from a neighbor
+    /// </summary>
+    /// <param name="term">The term of the vote</param>
+    /// <param name="voterId">The ID of the node that voted</param>
     public void ReceiveVote(int term, int voterId)
     {
         if (_currentRole != NodeRole.Candidate || term != _currentTerm)
@@ -235,6 +293,9 @@ public class Node
         CheckElectionResult();
     }
 
+    /// <summary>
+    /// Sends a heartbeat to all neighbors. In a online scenario, this would be done by the leader to all followers and would be done periodically.
+    /// </summary>
     private void SendHeartbeat()
     {
         if (IsOffline)
@@ -249,6 +310,11 @@ public class Node
         }
     }
 
+    /// <summary>
+    /// Receives a heartbeat from a leader
+    /// </summary>
+    /// <param name="term">The term of the heartbeat</param>
+    /// <param name="leaderId">The ID of the leader that sent the heartbeat</param>
     public void ReceiveHeartbeat(int term, int leaderId)
     {
         if (IsOffline)
@@ -274,7 +340,9 @@ public class Node
         }
     }
 
-    // Checks if this node won the election
+    /// <summary>
+    /// Checks if this node won the election
+    /// </summary>
     private void CheckElectionResult()
     {
         if (_currentRole == NodeRole.Leader)
@@ -290,6 +358,11 @@ public class Node
         }
     }
 
+    /// <summary>
+    /// Requests a vote from a neighbor
+    /// </summary>
+    /// <param name="term">The term of the vote</param>
+    /// <param name="candidateId">The ID of the node that requested the vote</param>
     public void RequestVote(int term, int candidateId)
     {
         if (IsOffline)

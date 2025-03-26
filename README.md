@@ -2,11 +2,17 @@
 
 This is a simulation of a distributed system using the Raft algorithm. For this, we're simulating a distributed system with 3 nodes.
 
+## System Requirements
+
+- .NET 8.0
+- Visual Studio 2022 or Visual Studio Code with C# Dev Kit installed
+- .NET CLI
+
 ## How to run
 
 1. Clone the repository
 2. cd into the DistributedSystemSimulation folder
-3. dotnet run
+3. ```dotnet run```
 4. The output will be displayed in the console
 
 ## Step by Step Simulation

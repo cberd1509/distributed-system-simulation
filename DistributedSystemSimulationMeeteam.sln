@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedSystemSimulation", "DistributedSystemSimulation\DistributedSystemSimulation.csproj", "{69B8226D-C586-4B6C-B276-769EAC92DC68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedSystemSimulation.Tests", "DistributedSystemSimulation.Tests\DistributedSystemSimulation.Tests.csproj", "{A825E4EB-5695-4DF2-91AA-F6A2E0B6AECD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{69B8226D-C586-4B6C-B276-769EAC92DC68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69B8226D-C586-4B6C-B276-769EAC92DC68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69B8226D-C586-4B6C-B276-769EAC92DC68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A825E4EB-5695-4DF2-91AA-F6A2E0B6AECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A825E4EB-5695-4DF2-91AA-F6A2E0B6AECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A825E4EB-5695-4DF2-91AA-F6A2E0B6AECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A825E4EB-5695-4DF2-91AA-F6A2E0B6AECD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

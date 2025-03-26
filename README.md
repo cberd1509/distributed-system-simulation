@@ -33,3 +33,11 @@ This is a simulation of a distributed system using the Raft algorithm. For this,
 14. Program will display the individual logs of each node and the final state of the distributed system.
 
 <img width="780" alt="image" src="https://github.com/user-attachments/assets/a6c70f26-0d35-483c-95cc-382cf29a81be" />
+
+
+## Running Tests
+
+We're using xUnit for the tests. To run the tests, you can use the following command:
+1. ```dotnet test```
+
+

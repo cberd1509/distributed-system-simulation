@@ -30,42 +30,42 @@ public class Node
     /// <summary>
     /// The log entries of the node
     /// </summary>
-    private readonly List<string> _logEntries = [];
+    public List<string> LogEntries { get; } = [];
 
     /// <summary>
     /// Whether the node is offline or not (Simulated)
     /// </summary>
-    private bool IsOffline { get; set; } = false;
+    public bool IsOffline { get; set; } = false;
 
     /// <summary>
     /// The current role of the node
     /// </summary>
-    private NodeRole _currentRole = NodeRole.Follower;
+    public NodeRole CurrentRole { get; set; } = NodeRole.Follower;
 
     /// <summary>
     /// The current term of the leadership election
     /// </summary>
-    private int _currentTerm = 0;
+    public int CurrentTerm { get; set; } = 0;
 
     /// <summary>
     /// The node that this node voted for in the current term
     /// </summary>
-    private int? _votedFor = null;
+    public int? VotedFor { get; set; } = null;
 
     /// <summary>
     /// The votes received from other nodes in the current term
     /// </summary>
-    private Dictionary<int, int> _votesReceived = new();
+    public Dictionary<int, int> VotesReceived { get; } = new();
 
     /// <summary>
     /// The current state of the node
     /// </summary>
-    private int _currentState = 0;
+    public int CurrentState { get; set; } = 0;
 
     /// <summary>
     /// The ID of the current leader
     /// </summary>
-    private int? _currentLeaderId = null;
+    public int? CurrentLeaderId { get; set; } = null;
 
     /// <summary>
     /// Initializes a new instance of the Node class
@@ -88,10 +88,10 @@ public class Node
             return;
         }
 
-        if (_currentRole == NodeRole.Leader)
+        if (CurrentRole == NodeRole.Leader)
         {
             // Leader handles proposal directly
-            _currentState = state;
+            CurrentState = state;
             Log($"Leader {Id} proposing new state: {state}");
 
             foreach (var neighbor in Neighbors)
@@ -99,18 +99,18 @@ public class Node
                 neighbor.HandleProposal(state, Id);
             }
         }
-        else if (_currentLeaderId != null)
+        else if (CurrentLeaderId != null)
         {
             // Forward proposal to the leader
-            var leader = Neighbors.FirstOrDefault(n => n.Id == _currentLeaderId);
+            var leader = Neighbors.FirstOrDefault(n => n.Id == CurrentLeaderId);
             if (leader != null)
             {
-                Log($"Node {Id} forwarding proposal {state} to Leader {_currentLeaderId}");
+                Log($"Node {Id} forwarding proposal {state} to Leader {CurrentLeaderId}");
                 leader.ProposeState(state);
             }
             else
             {
-                Log($"Leader {_currentLeaderId} not found, cannot forward proposal");
+                Log($"Leader {CurrentLeaderId} not found, cannot forward proposal");
             }
         }
         else
@@ -132,9 +132,9 @@ public class Node
             return;
         }
 
-        if (state >= _currentState)
+        if (state >= CurrentState)
         {
-            _currentState = state;
+            CurrentState = state;
             Log($"Node {Id} accepted proposal {state} from Leader {proposerId}");
         }
     }
@@ -147,9 +147,9 @@ public class Node
     {
         Neighbors.Add(neighbor);
 
-        if (_currentRole == NodeRole.Leader)
+        if (CurrentRole == NodeRole.Leader)
         {
-            neighbor.ReceiveHeartbeat(_currentTerm, Id);
+            neighbor.ReceiveHeartbeat(CurrentTerm, Id);
             SynchronizeFollower(neighbor);
         }
     }
@@ -164,16 +164,16 @@ public class Node
 
         // If the node is the leader, it should start an election
         // In a real scenario, we would have heartbeat mechanism to detect if the leader is offline and elect a new leader
-        if (_currentRole == NodeRole.Leader)
+        if (CurrentRole == NodeRole.Leader)
         {
             // Clear the leader id for this and all neighbors, next time they will start an election
-            _currentLeaderId = null;
-            _currentRole = NodeRole.Follower;
+            CurrentLeaderId = null;
+            CurrentRole = NodeRole.Follower;
 
             foreach (var neighbor in Neighbors)
             {
-                neighbor._currentLeaderId = null;
-                neighbor._currentRole = NodeRole.Follower;
+                neighbor.CurrentLeaderId = null;
+                neighbor.CurrentRole = NodeRole.Follower;
             }
 
             // Let any of the remaining online neighbors start an election
@@ -193,21 +193,21 @@ public class Node
         // Ask neighbors synchronously who the leader is
         foreach (var neighbor in Neighbors.Where(n => !n.IsOffline))
         {
-            if (neighbor._currentLeaderId.HasValue)
+            if (neighbor.CurrentLeaderId.HasValue)
             {
-                _currentLeaderId = neighbor._currentLeaderId;
-                Log($"Discovered Leader {_currentLeaderId} from Node {neighbor.Id}");
+                CurrentLeaderId = neighbor.CurrentLeaderId;
+                Log($"Discovered Leader {CurrentLeaderId} from Node {neighbor.Id}");
 
-                var leader = Neighbors.FirstOrDefault(n => n.Id == _currentLeaderId);
+                var leader = Neighbors.FirstOrDefault(n => n.Id == CurrentLeaderId);
                 leader?.SynchronizeFollower(this);
                 return;
             }
 
             // Additionally, if neighbor itself is the leader
-            if (neighbor._currentRole == NodeRole.Leader)
+            if (neighbor.CurrentRole == NodeRole.Leader)
             {
-                _currentLeaderId = neighbor.Id;
-                Log($"Discovered Leader {_currentLeaderId} directly (Neighbor Node {neighbor.Id})");
+                CurrentLeaderId = neighbor.Id;
+                Log($"Discovered Leader {CurrentLeaderId} directly (Neighbor Node {neighbor.Id})");
 
                 neighbor.SynchronizeFollower(this);
                 return;
@@ -225,13 +225,13 @@ public class Node
     /// <param name="follower">The follower to synchronize with</param>
     public void SynchronizeFollower(Node follower)
     {
-        if (_currentRole != NodeRole.Leader)
+        if (CurrentRole != NodeRole.Leader)
         {
             Log($"Cannot synchronize follower {follower.Id}, not the leader.");
             return;
         }
 
-        follower.ReceiveSynchronization(_currentState);
+        follower.ReceiveSynchronization(CurrentState);
     }
 
     /// <summary>
@@ -240,14 +240,14 @@ public class Node
     /// <param name="state">The state to synchronize with</param>
     public void ReceiveSynchronization(int state)
     {
-        if (state > _currentState)
+        if (state > CurrentState)
         {
-            Log($"Synchronized state updated from {_currentState} to {state}");
-            _currentState = state;
+            Log($"Synchronized state updated from {CurrentState} to {state}");
+            CurrentState = state;
         }
         else
         {
-            Log($"No synchronization needed. Current state is up-to-date: {_currentState}");
+            Log($"No synchronization needed. Current state is up-to-date: {CurrentState}");
         }
     }
 
@@ -262,17 +262,17 @@ public class Node
             return;
         }
 
-        _currentRole = NodeRole.Candidate;
-        _currentTerm++;
-        _votesReceived.Clear();
-        _votesReceived[Id] = _currentTerm;
-        _votedFor = Id;
+        CurrentRole = NodeRole.Candidate;
+        CurrentTerm++;
+        VotesReceived.Clear();
+        VotesReceived[Id] = CurrentTerm;
+        VotedFor = Id;
 
-        Log($"Started election for term {_currentTerm}");
+        Log($"Started election for term {CurrentTerm}");
 
         foreach (var neighbor in Neighbors)
         {
-            neighbor.RequestVote(_currentTerm, Id);
+            neighbor.RequestVote(CurrentTerm, Id);
         }
 
         CheckElectionResult();
@@ -285,10 +285,10 @@ public class Node
     /// <param name="voterId">The ID of the node that voted</param>
     public void ReceiveVote(int term, int voterId)
     {
-        if (_currentRole != NodeRole.Candidate || term != _currentTerm)
+        if (CurrentRole != NodeRole.Candidate || term != CurrentTerm)
             return;
 
-        _votesReceived[voterId] = term;
+        VotesReceived[voterId] = term;
         Log($"Received vote from Node {voterId} in term {term}");
         CheckElectionResult();
     }
@@ -306,7 +306,7 @@ public class Node
 
         foreach (var neighbor in Neighbors)
         {
-            neighbor.ReceiveHeartbeat(_currentTerm, Id);
+            neighbor.ReceiveHeartbeat(CurrentTerm, Id);
         }
     }
 
@@ -323,16 +323,16 @@ public class Node
             return;
         }
 
-        bool leaderChanged = _currentLeaderId != leaderId;
+        bool leaderChanged = CurrentLeaderId != leaderId;
 
-        if (term >= _currentTerm || leaderChanged)
+        if (term >= CurrentTerm || leaderChanged)
         {
-            _currentTerm = term;
-            _currentRole = NodeRole.Follower;
-            _currentLeaderId = leaderId;
+            CurrentTerm = term;
+            CurrentRole = NodeRole.Follower;
+            CurrentLeaderId = leaderId;
             Log($"Heartbeat received from Leader {leaderId} for term {term}");
 
-            if (leaderChanged || _currentState == 0)
+            if (leaderChanged || CurrentState == 0)
             {
                 var leader = Neighbors.FirstOrDefault(n => n.Id == leaderId);
                 leader?.SynchronizeFollower(this);
@@ -345,15 +345,15 @@ public class Node
     /// </summary>
     private void CheckElectionResult()
     {
-        if (_currentRole == NodeRole.Leader)
+        if (CurrentRole == NodeRole.Leader)
             return;
 
         var majority = (Neighbors.Count + 1) / 2 + 1;
-        if (_votesReceived.Count >= majority)
+        if (VotesReceived.Count >= majority)
         {
-            _currentRole = NodeRole.Leader;
-            _currentLeaderId = Id; // set self as leader
-            Log($"Node {Id} became Leader for term {_currentTerm}");
+            CurrentRole = NodeRole.Leader;
+            CurrentLeaderId = Id; // set self as leader
+            Log($"Node {Id} became Leader for term {CurrentTerm}");
             SendHeartbeat();
         }
     }
@@ -371,16 +371,16 @@ public class Node
             return;
         }
 
-        if (term > _currentTerm)
+        if (term > CurrentTerm)
         {
-            _currentTerm = term;
-            _votedFor = null;
-            _currentRole = NodeRole.Follower;
+            CurrentTerm = term;
+            VotedFor = null;
+            CurrentRole = NodeRole.Follower;
         }
 
-        if (_votedFor == null)
+        if (VotedFor == null)
         {
-            _votedFor = candidateId;
+            VotedFor = candidateId;
             Log($"Voted for Node {candidateId} in term {term}");
             var candidate = Neighbors.FirstOrDefault(n => n.Id == candidateId);
             candidate?.ReceiveVote(term, Id);
@@ -394,7 +394,7 @@ public class Node
     public void Log(string message)
     {
         Console.WriteLine($"Node {Id}: {message}");
-        _logEntries.Add(message);
+        LogEntries.Add(message);
     }
 
     /// <summary>
@@ -403,7 +403,7 @@ public class Node
     public void DisplayLog()
     {
         Console.WriteLine($"Node {Id} Log:");
-        foreach (var entry in _logEntries)
+        foreach (var entry in LogEntries)
         {
             Console.WriteLine(entry);
         }

@@ -31,3 +31,5 @@ This is a simulation of a distributed system using the Raft algorithm. For this,
 12. Node 1 will go back online, it will discover that Node 2 is the leader and will synchronize its state with Node 2. It will remain as a follower.
 13. Node 1 will propose a new state again, this time, as it is not the leader, it will forward the proposal to the leader. Which is now Node 2, it will receive the proposal and acknowledge it, updating its state, then it will propose a new state to Node 1 and Node 3. Now Node 1 and Node 3 will receive the proposal and acknowledge it.
 14. Program will display the individual logs of each node and the final state of the distributed system.
+
+<img width="780" alt="image" src="https://github.com/user-attachments/assets/a6c70f26-0d35-483c-95cc-382cf29a81be" />
